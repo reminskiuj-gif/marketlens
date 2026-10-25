@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="uk" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MarketLens — акції та криптовалюта</title>
+  <meta name="description" content="Статистика, перегляд і порівняння акцій компаній та криптовалют.">
+  <link rel="stylesheet" href="css/styles.css">
+  <script>
+    // Застосовуємо збережену тему до рендеру сторінки, щоб не було "блимання"
+    (function () {
+      try {
+        var saved = JSON.parse(localStorage.getItem('marketlens.state') || '{}');
+        var theme = saved.theme || 'dark';
+        if (theme === 'system') document.documentElement.removeAttribute('data-theme');
+        else document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) { /* localStorage недоступний — лишаємо тему за замовчуванням */ }
+    })();
+  </script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner container">
+      <a class="brand" href="#">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path d="M3 17l5-5 4 4 8-8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        MarketLens
+      </a>
+
+      <nav class="tabs" role="tablist" data-i18n-aria="nav.label" data-active="stocks">
+        <span class="tab-indicator" aria-hidden="true"></span>
+        <button class="tab" role="tab" data-tab="stocks" data-i18n="nav.stocks">Акції</button>
+        <button class="tab" role="tab" data-tab="crypto" data-i18n="nav.crypto">Криптовалюта</button>
+      </nav>
+
+      <div class="topbar-actions">
+        <div class="search">
+          <svg class="search-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M20 20l-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <input id="search-input" type="search" placeholder="Пошук акцій і криптовалют" autocomplete="off"
+            data-i18n-placeholder="search.placeholder" data-i18n-aria="search.label">
+          <kbd class="search-kbd" aria-hidden="true">/</kbd>
+          <div id="search-results" class="search-results" hidden></div>
+        </div>
+        <button id="lang-btn" class="icon-btn lang-btn" data-i18n-title="header.language" data-i18n-aria="header.language">UA</button>
+        <button id="settings-btn" class="icon-btn" data-i18n-title="header.settings" data-i18n-aria="header.settings">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="market" class="container market">
+    <section class="hero">
+      <div>
+        <h1 id="page-title">Ринок акцій</h1>
+        <p id="page-subtitle" class="muted"></p>
+      </div>
+      <div class="hero-controls">
+        <span class="muted small" data-i18n="period.label">Період:</span>
+        <div id="period-switch" class="segmented" role="radiogroup"></div>
+      </div>
+    </section>
+
+    <section class="movers">
+      <article class="card">
+        <header class="card-header">
+          <h2><span class="dot dot-up"></span><span data-i18n="movers.gainers">Найбільше зростання</span></h2>
+          <span id="gainers-period" class="muted small"></span>
+        </header>
+        <ol id="gainers-list" class="movers-list"></ol>
+      </article>
+      <article class="card">
+        <header class="card-header">
+          <h2><span class="dot dot-down"></span><span data-i18n="movers.losers">Найбільше падіння</span></h2>
+          <span id="losers-period" class="muted small"></span>
+        </header>
+        <ol id="losers-list" class="movers-list"></ol>
+      </article>
+    </section>
+
+    <section class="card table-card">
+      <header class="card-header">
+        <h2 id="table-title">Усі акції</h2>
+        <span class="muted small" data-i18n="table.hint"></span>
+      </header>
+      <div class="table-wrap">
+        <table class="assets-table">
+          <thead>
+            <tr>
+              <th class="col-check"><span class="visually-hidden" data-i18n="table.compare">Порівняти</span></th>
+              <th class="col-rank">#</th>
+              <th data-sort="name" class="sortable"><span data-i18n="table.name">Назва</span></th>
+              <th data-sort="price" class="sortable num"><span data-i18n="table.price">Ціна</span></th>
+              <th data-sort="change" class="sortable num"><span id="change-header">Зміна</span></th>
+              <th class="col-spark" data-i18n="table.chart">Графік</th>
+              <th data-sort="marketCap" class="sortable num"><span data-i18n="table.marketCap">Капіталізація</span></th>
+              <th id="category-header">Сектор</th>
+            </tr>
+          </thead>
+          <tbody id="assets-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer container">
+    <span data-i18n="footer.project">MarketLens · навчальний проєкт</span>
+    <span class="muted" data-i18n="footer.disclaimer"></span>
+  </footer>
+
+  <!-- Панель порівняння: з'являється, коли користувач обрав хоча б одну позицію -->
+  <div id="compare-tray" class="compare-tray" hidden>
+    <div class="tray-label">
+      <strong data-i18n="tray.title">Порівняння</strong>
+      <span id="tray-count" class="muted small"></span>
+    </div>
+    <div id="tray-items" class="tray-items"></div>
+    <div class="tray-actions">
+      <button id="tray-clear" class="btn btn-ghost" data-i18n="tray.clear">Очистити</button>
+      <button id="tray-compare" class="btn btn-primary"></button>
+    </div>
+  </div>
+
+  <!-- Вікно порівняння -->
+  <div id="compare-modal" class="modal" hidden>
+    <div class="modal-backdrop" data-close></div>
+    <div class="modal-dialog modal-lg" role="dialog" aria-modal="true" aria-labelledby="compare-title">
+      <header class="modal-header">
+        <div>
+          <h2 id="compare-title" data-i18n="compare.title">Порівняння</h2>
+          <p id="compare-summary" class="muted small"></p>
+        </div>
+        <div class="modal-header-actions">
+          <div id="compare-period" class="segmented" role="radiogroup" data-i18n-aria="compare.periodLabel"></div>
+          <button class="icon-btn" data-close data-i18n-aria="common.close">✕</button>
+        </div>
+      </header>
+      <div class="chart-box">
+        <canvas id="compare-chart" data-i18n-aria="compare.chartLabel"></canvas>
+      </div>
+      <p class="muted small chart-note" data-i18n="compare.note"></p>
+      <div class="table-wrap">
+        <table id="compare-table" class="compare-table"></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Налаштування -->
+  <div id="settings-modal" class="modal" hidden>
+    <div class="modal-backdrop" data-close></div>
+    <div class="modal-dialog modal-sm" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+      <header class="modal-header">
+        <h2 id="settings-title" data-i18n="settings.title">Налаштування</h2>
+        <button class="icon-btn" data-close data-i18n-aria="common.close">✕</button>
+      </header>
+      <form id="settings-form" class="settings-form" onsubmit="return false">
+        <fieldset>
+          <legend data-i18n="settings.theme">Тема оформлення</legend>
+          <div class="theme-options">
+            <label class="theme-option"><input type="radio" name="theme" value="light"><span data-i18n="settings.theme.light">Світла</span></label>
+            <label class="theme-option"><input type="radio" name="theme" value="dark"><span data-i18n="settings.theme.dark">Темна</span></label>
+            <label class="theme-option"><input type="radio" name="theme" value="system"><span data-i18n="settings.theme.system">Як у системі</span></label>
+          </div>
+        </fieldset>
+        <label class="field">
+          <span data-i18n="settings.language">Мова</span>
+          <select name="lang"></select>
+        </label>
+        <label class="field">
+          <span data-i18n="settings.defaultPeriod">Період за замовчуванням</span>
+          <select name="defaultPeriod"></select>
+        </label>
+        <label class="field">
+          <span data-i18n="settings.currency">Валюта</span>
+          <select disabled><option>USD ($)</option></select>
+          <small class="muted" data-i18n="settings.currencySoon"></small>
+        </label>
+      </form>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/data/assets.js"></script>
+  <script src="js/data/mockGenerator.js"></script>
+  <script src="js/services/dataService.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/ui/components.js"></script>
+  <script src="js/ui/header.js"></script>
+  <script src="js/ui/marketView.js"></script>
+  <script src="js/ui/search.js"></script>
+  <script src="js/ui/compareTray.js"></script>
+  <script src="js/ui/compareView.js"></script>
+  <script src="js/ui/settings.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

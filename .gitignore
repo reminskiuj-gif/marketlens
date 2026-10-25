@@ -1,0 +1,18 @@
+# Системні файли
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Редактори
+.vscode/
+.idea/
+*.swp
+
+# Залежності та збірка (знадобляться пізніше)
+node_modules/
+dist/
+
+# Ключі API: ніколи не комітимо
+.env
+.env.*
+config.local.js
