@@ -10,7 +10,15 @@ window.App = window.App || {};
   const { formatPrice, formatCompact, escapeHtml } = App.utils;
 
   const MOVERS_COUNT = 5;
+  const SKELETON_ROWS = 8;
+  const SKELETON_DELAY_MS = 250; // швидкі відповіді (з кешу) обходяться без скелетонів
   const els = {};
+
+  // Обраний сектор (категорія) окремо для кожного розділу; 'all' — без фільтра
+  const filters = { stocks: 'all', crypto: 'all' };
+  let skeletonTimer = null;
+  let lastItems = [];
+  let lastState = null;
 
   function init() {
     els.root = document.getElementById('market');
@@ -27,14 +35,28 @@ window.App = window.App || {};
     els.changeHeader = document.getElementById('change-header');
     els.categoryHeader = document.getElementById('category-header');
     els.source = document.getElementById('source-badge');
+    els.alert = document.getElementById('market-alert');
+    els.filter = document.getElementById('category-filter');
 
     // Делегування подій: один обробник на весь список замість обробника на кожен рядок
     [els.gainers, els.losers].forEach(list => list.addEventListener('click', event => {
       const compareBtn = event.target.closest('[data-compare-id]');
       if (compareBtn) return App.actions.toggleCompare(compareBtn.dataset.compareId);
-      const gotoBtn = event.target.closest('[data-goto-id]');
-      if (gotoBtn) App.actions.goToAsset(gotoBtn.dataset.gotoId);
+      const detailsBtn = event.target.closest('[data-details-id]');
+      if (detailsBtn) App.actions.openDetails(detailsBtn.dataset.detailsId);
     }));
+
+    els.filter.addEventListener('click', event => {
+      const chip = event.target.closest('[data-category]');
+      if (!chip) return;
+      filters[lastState.tab] = chip.dataset.category;
+      renderFilter(lastItems, lastState);
+      renderTable(lastItems, lastState, ui.periodLong(lastState.period));
+    });
+
+    els.alert.addEventListener('click', event => {
+      if (event.target.closest('[data-retry]')) App.actions.retry();
+    });
 
     els.tbody.addEventListener('change', event => {
       const checkbox = event.target.closest('[data-compare-id]');
@@ -59,12 +81,61 @@ window.App = window.App || {};
     });
   }
 
+  // Поки дані вантажаться, старий вміст приглушений. Якщо чекати довше
+  // за SKELETON_DELAY_MS, замість нього показуємо скелетони
   function setLoading(isLoading) {
+    clearTimeout(skeletonTimer);
     els.root.classList.toggle('is-loading', isLoading);
+    if (!isLoading) {
+      els.root.classList.remove('is-skeleton');
+      return;
+    }
+    skeletonTimer = setTimeout(renderSkeleton, SKELETON_DELAY_MS);
+  }
+
+  function renderSkeleton() {
+    els.root.classList.add('is-skeleton');
+    const moverRows = Array.from({ length: MOVERS_COUNT }, () => `<li class="mover" aria-hidden="true">
+      <span class="mover-main"><span class="skeleton skeleton-circle"></span>
+        <span class="skeleton-text"><span class="skeleton skeleton-line" style="width:70%"></span><span class="skeleton skeleton-line" style="width:35%"></span></span>
+      </span>
+      <span class="skeleton skeleton-line" style="width:64px"></span>
+      <span class="skeleton skeleton-line" style="width:64px;height:22px"></span>
+      <span class="skeleton" style="width:30px;height:30px;border-radius:8px"></span>
+    </li>`).join('');
+    els.gainers.innerHTML = moverRows;
+    els.losers.innerHTML = moverRows;
+
+    const line = width => `<span class="skeleton skeleton-line" style="width:${width}px;margin-left:auto"></span>`;
+    els.tbody.innerHTML = Array.from({ length: SKELETON_ROWS }, () => `<tr aria-hidden="true">
+      <td class="col-check"><span class="skeleton" style="width:18px;height:18px;border-radius:5px"></span></td>
+      <td class="col-rank"><span class="skeleton skeleton-line" style="width:14px"></span></td>
+      <td><span class="asset-link"><span class="skeleton skeleton-circle"></span>
+        <span class="skeleton-text" style="width:120px"><span class="skeleton skeleton-line"></span><span class="skeleton skeleton-line" style="width:50%"></span></span></span></td>
+      <td>${line(80)}</td>
+      <td>${line(70)}</td>
+      <td class="col-spark"><span class="skeleton" style="width:110px;height:24px"></span></td>
+      <td>${line(64)}</td>
+      <td><span class="skeleton skeleton-line" style="width:90px"></span></td>
+    </tr>`).join('');
+  }
+
+  // Повідомлення над списками: kind — 'offline', 'liveFailed' або null (сховати)
+  function showAlert(kind) {
+    els.alert.hidden = !kind;
+    if (!kind) return;
+    els.alert.innerHTML = `<span class="alert-icon" aria-hidden="true">!</span>
+      <div class="alert-body">
+        <strong>${t(`alert.${kind}.title`)}</strong>
+        <p>${t(`alert.${kind}.text`)}</p>
+      </div>
+      <button class="btn btn-ghost btn-sm" type="button" data-retry>${t('alert.retry')}</button>`;
   }
 
   function render(items, state) {
     setLoading(false);
+    lastItems = items;
+    lastState = state;
     const section = `market.${state.tab}`;
     const periodLong = ui.periodLong(state.period);
 
@@ -78,7 +149,23 @@ window.App = window.App || {};
     renderSource(state);
     ui.periodSwitch(els.period, state.period, value => store.set({ period: value }));
     renderMovers(items, state);
+    renderFilter(items, state);
     renderTable(items, state, periodLong);
+  }
+
+  // Кнопки-фільтри: "Усі" і кожен сектор (категорія), що є в розділі, з кількістю активів
+  function renderFilter(items, state) {
+    const counts = {};
+    items.forEach(item => { counts[item.category] = (counts[item.category] || 0) + 1; });
+    const categories = Object.keys(counts).sort((a, b) => counts[b] - counts[a] || a.localeCompare(b));
+    const active = filters[state.tab];
+
+    const chip = (value, label, count) => `<button type="button" class="chip ${value === active ? 'is-active' : ''}"
+      data-category="${value}" aria-pressed="${value === active}">${escapeHtml(label)}<span class="chip-count">${count}</span></button>`;
+
+    els.filter.setAttribute('aria-label', t(`market.${state.tab}.filterLabel`));
+    els.filter.innerHTML = chip('all', t('filter.all'), items.length)
+      + categories.map(category => chip(category, t('category.' + category), counts[category])).join('');
   }
 
   // Позначка "Живі дані" / "Тестові дані" під заголовком
@@ -132,7 +219,7 @@ window.App = window.App || {};
   function moverRow(item, state) {
     const selected = state.compare.includes(item.id);
     return `<li class="mover">
-      <button class="mover-main" data-goto-id="${item.id}" title="${t('movers.showInTable')}">
+      <button class="mover-main" data-details-id="${item.id}" title="${t('movers.openDetails')}">
         ${ui.logo(item)}${ui.assetName(item)}
       </button>
       <span class="mover-price">${formatPrice(item.price)}</span>
@@ -166,7 +253,9 @@ window.App = window.App || {};
       }
     });
 
-    els.tbody.innerHTML = sortItems(items, state.sort).map((item, index) => {
+    const category = filters[state.tab];
+    const visible = category === 'all' ? items : items.filter(item => item.category === category);
+    els.tbody.innerHTML = sortItems(visible, state.sort).map((item, index) => {
       const selected = state.compare.includes(item.id);
       return `<tr data-row-id="${item.id}" class="${selected ? 'is-selected' : ''}">
         <td class="col-check">
@@ -176,7 +265,7 @@ window.App = window.App || {};
           </label>
         </td>
         <td class="col-rank">${index + 1}</td>
-        <td><button class="asset-link" data-details-id="${item.id}">${ui.logo(item)}${ui.assetName(item)}</button></td>
+        <td><button class="asset-link" data-details-id="${item.id}" title="${t('movers.openDetails')}">${ui.logo(item)}${ui.assetName(item)}</button></td>
         <td class="num cell-price">${formatPrice(item.price)}</td>
         <td class="num cell-change">${ui.change(item.change)}</td>
         <td class="col-spark">${ui.sparkline(item.sparkline)}</td>
@@ -188,7 +277,14 @@ window.App = window.App || {};
 
   // Прокручує таблицю до активу і коротко підсвічує рядок
   function highlight(id) {
-    const row = els.tbody.querySelector(`[data-row-id="${CSS.escape(id)}"]`);
+    let row = els.tbody.querySelector(`[data-row-id="${CSS.escape(id)}"]`);
+    // Рядок міг бути схований фільтром — тоді знімаємо фільтр
+    if (!row && lastState && filters[lastState.tab] !== 'all') {
+      filters[lastState.tab] = 'all';
+      renderFilter(lastItems, lastState);
+      renderTable(lastItems, lastState, ui.periodLong(lastState.period));
+      row = els.tbody.querySelector(`[data-row-id="${CSS.escape(id)}"]`);
+    }
     if (!row) return;
     row.scrollIntoView({ block: 'center', behavior: 'smooth' });
     row.classList.remove('flash');
@@ -196,5 +292,5 @@ window.App = window.App || {};
     row.classList.add('flash');
   }
 
-  App.marketView = { init, render, setLoading, highlight, updateLive };
+  App.marketView = { init, render, setLoading, showAlert, highlight, updateLive };
 })(window.App);

@@ -30,12 +30,16 @@ window.App = window.App || {};
     });
     tabsEl.addEventListener('click', event => {
       const button = event.target.closest('[data-tab]');
-      if (button) store.set({ tab: button.dataset.tab });
+      if (!button) return;
+      // Зі сторінки активу вкладка повертає на головний екран розділу
+      App.actions.showMarket();
+      store.set({ tab: button.dataset.tab });
     });
 
     document.getElementById('settings-btn').addEventListener('click', () => App.settings.open());
     document.querySelector('.brand').addEventListener('click', event => {
       event.preventDefault();
+      App.actions.showMarket();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 

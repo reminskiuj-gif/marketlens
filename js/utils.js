@@ -77,6 +77,33 @@ window.App = window.App || {};
     return '$' + formatters().compact.format(value);
   }
 
+  // Кількість без знака долара: 14,6 млрд
+  function formatAmount(value) {
+    return formatters().compact.format(value);
+  }
+
+  // Основні показники ряду цін [{ time, price }] за період.
+  // Використовуються у вікні порівняння і на сторінці активу
+  function seriesMetrics(series) {
+    const prices = series.map(point => point.price);
+    const start = prices[0];
+    const end = prices[prices.length - 1];
+    let peak = start;
+    let maxDrawdown = 0;
+    prices.forEach(price => {
+      peak = Math.max(peak, price);
+      maxDrawdown = Math.min(maxDrawdown, (price / peak - 1) * 100);
+    });
+    return {
+      start,
+      end,
+      change: (end / start - 1) * 100,
+      high: Math.max(...prices),
+      low: Math.min(...prices),
+      maxDrawdown
+    };
+  }
+
   // Підпис осі графіка залежить від періоду: години для дня, місяці для року
   function formatAxisDate(time, period) {
     if (period === 'day') return formatters().time.format(time);
@@ -131,6 +158,8 @@ window.App = window.App || {};
     formatPrice,
     formatPercent,
     formatCompact,
+    formatAmount,
+    seriesMetrics,
     formatAxisDate,
     formatFullDate,
     escapeHtml,

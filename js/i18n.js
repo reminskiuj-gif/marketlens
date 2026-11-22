@@ -57,7 +57,7 @@ window.App = window.App || {};
 
       'movers.gainers': 'Найбільше зростання',
       'movers.losers': 'Найбільше падіння',
-      'movers.showInTable': 'Показати в таблиці',
+      'movers.openDetails': 'Відкрити сторінку активу',
 
       'table.hint': 'Позначте до 5 позицій, щоб порівняти їх, зокрема акції разом із криптовалютою',
       'table.compare': 'Порівняти',
@@ -106,9 +106,27 @@ window.App = window.App || {};
       'tag.crypto': 'Крипто',
 
       'toast.maxCompare': 'Можна порівнювати до {max} позицій одночасно',
-      'toast.detailsSoon': 'Детальна сторінка активу в розробці',
       'toast.defaultPeriodSaved': 'Період за замовчуванням збережено',
-      'toast.liveFailed': 'Не вдалося отримати живі дані, показано тестові',
+
+      'alert.offline.title': 'Немає підключення до інтернету',
+      'alert.offline.text': "Показано тестові дані. Щойно зв'язок відновиться, ціни оновляться самі.",
+      'alert.liveFailed.title': 'Не вдалося завантажити живі дані',
+      'alert.liveFailed.text': 'Джерело даних зараз недоступне або вичерпано ліміт запитів, тому показано тестові дані.',
+      'alert.retry': 'Спробувати ще раз',
+
+      'filter.all': 'Усі',
+      'market.stocks.filterLabel': 'Фільтр за сектором',
+      'market.crypto.filterLabel': 'Фільтр за категорією',
+
+      'asset.back.stocks': 'До ринку акцій',
+      'asset.back.crypto': 'До ринку криптовалют',
+      'asset.pageTitle': '{name} ({symbol}) — MarketLens',
+      'asset.chart': 'Динаміка ціни',
+      'asset.chartLabel': 'Графік ціни {name}',
+      'asset.supply.stocks': 'Акцій в обігу',
+      'asset.supply.crypto': 'Монет в обігу',
+      'asset.similar.stocks': 'Інші компанії сектору «{category}»',
+      'asset.similar.crypto': 'Інші криптовалюти категорії «{category}»',
 
       'footer.project': 'MarketLens · навчальний проєкт',
       'footer.disclaimer': 'Дані: Binance (криптовалюта), Finnhub і Twelve Data (акції). Якщо джерело недоступне, показуються тестові дані. Сайт не дає інвестиційних порад.',
@@ -182,7 +200,7 @@ window.App = window.App || {};
 
       'movers.gainers': 'Top gainers',
       'movers.losers': 'Top losers',
-      'movers.showInTable': 'Show in table',
+      'movers.openDetails': 'Open asset page',
 
       'table.hint': 'Select up to 5 items to compare them, including stocks together with crypto',
       'table.compare': 'Compare',
@@ -231,9 +249,27 @@ window.App = window.App || {};
       'tag.crypto': 'Crypto',
 
       'toast.maxCompare': 'You can compare up to {max} items at once',
-      'toast.detailsSoon': 'The asset details page is in development',
       'toast.defaultPeriodSaved': 'Default period saved',
-      'toast.liveFailed': 'Could not load live data, showing demo data',
+
+      'alert.offline.title': 'No internet connection',
+      'alert.offline.text': 'Demo data is shown. Prices will update on their own once you are back online.',
+      'alert.liveFailed.title': 'Could not load live data',
+      'alert.liveFailed.text': 'The data source is unavailable right now or the request limit was reached, so demo data is shown.',
+      'alert.retry': 'Try again',
+
+      'filter.all': 'All',
+      'market.stocks.filterLabel': 'Filter by sector',
+      'market.crypto.filterLabel': 'Filter by category',
+
+      'asset.back.stocks': 'Back to stocks',
+      'asset.back.crypto': 'Back to crypto',
+      'asset.pageTitle': '{name} ({symbol}) — MarketLens',
+      'asset.chart': 'Price chart',
+      'asset.chartLabel': 'Price chart for {name}',
+      'asset.supply.stocks': 'Shares outstanding',
+      'asset.supply.crypto': 'Circulating supply',
+      'asset.similar.stocks': 'Other companies in {category}',
+      'asset.similar.crypto': 'More in {category}',
 
       'footer.project': 'MarketLens · student project',
       'footer.disclaimer': 'Data: Binance (crypto), Finnhub and Twelve Data (stocks). Demo data is shown if a source is unavailable. This site is not investment advice.',

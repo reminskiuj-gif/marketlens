@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>MarketLens — акції та криптовалюта</title>
   <meta name="description" content="Статистика, перегляд і порівняння акцій компаній та криптовалют.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
   <link rel="stylesheet" href="css/styles.css">
   <script>
     // Застосовуємо збережену тему до рендеру сторінки, щоб не було "блимання"
@@ -19,6 +22,9 @@
   </script>
 </head>
 <body>
+  <!-- Анімований фон: кольорові плями повільно рухаються за контентом -->
+  <div class="bg-blobs" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+
   <header class="topbar">
     <div class="topbar-inner container">
       <a class="brand" href="#">
@@ -63,6 +69,9 @@
       </div>
     </section>
 
+    <!-- Повідомлення, якщо не вдалося отримати живі дані -->
+    <div id="market-alert" class="alert" role="alert" hidden></div>
+
     <section class="movers">
       <article class="card">
         <header class="card-header">
@@ -85,6 +94,9 @@
         <h2 id="table-title">Усі акції</h2>
         <span class="muted small" data-i18n="table.hint"></span>
       </header>
+      <div class="table-toolbar">
+        <div id="category-filter" class="chips" role="group"></div>
+      </div>
       <div class="table-wrap">
         <table class="assets-table">
           <thead>
@@ -102,6 +114,39 @@
           <tbody id="assets-tbody"></tbody>
         </table>
       </div>
+    </section>
+  </main>
+
+  <!-- Детальна сторінка активу: відкривається за адресою #/asset/<id> -->
+  <main id="asset-page" class="container asset-page" hidden>
+    <button id="asset-back" class="back-link" type="button"></button>
+
+    <section class="asset-hero">
+      <div id="asset-title" class="asset-title"></div>
+      <div class="asset-quote">
+        <div>
+          <div id="asset-price" class="asset-price"></div>
+          <div id="asset-change" class="asset-change"></div>
+        </div>
+        <button id="asset-compare" class="btn btn-primary" type="button"></button>
+      </div>
+    </section>
+
+    <section class="card asset-chart-card">
+      <header class="card-header">
+        <h2 data-i18n="asset.chart">Динаміка ціни</h2>
+        <div id="asset-period" class="segmented" role="radiogroup"></div>
+      </header>
+      <div class="chart-box asset-chart-box">
+        <canvas id="asset-chart"></canvas>
+      </div>
+    </section>
+
+    <section id="asset-stats" class="asset-stats"></section>
+
+    <section id="asset-similar-card" class="card">
+      <header class="card-header"><h2 id="asset-similar-title"></h2></header>
+      <div id="asset-similar" class="similar-list"></div>
     </section>
   </main>
 
@@ -201,6 +246,7 @@
   <script src="js/ui/search.js"></script>
   <script src="js/ui/compareTray.js"></script>
   <script src="js/ui/compareView.js"></script>
+  <script src="js/ui/assetView.js"></script>
   <script src="js/ui/settings.js"></script>
   <script src="js/app.js"></script>
 </body>

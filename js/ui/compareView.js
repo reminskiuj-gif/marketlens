@@ -5,7 +5,7 @@ window.App = window.App || {};
   'use strict';
 
   const { store, ui, dataService } = App;
-  const { formatPrice, formatPercent, formatAxisDate, formatFullDate, escapeHtml } = App.utils;
+  const { formatPrice, formatPercent, formatAxisDate, formatFullDate, escapeHtml, seriesMetrics } = App.utils;
   const { t } = App.i18n;
 
   const SERIES_COLORS = ['#5b8cff', '#f5a524', '#a855f7', '#14b8a6', '#ec4899'];
@@ -17,26 +17,6 @@ window.App = window.App || {};
 
   function cssVar(name) {
     return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-  }
-
-  function calcMetrics(series) {
-    const prices = series.map(point => point.price);
-    const start = prices[0];
-    const end = prices[prices.length - 1];
-    let peak = start;
-    let maxDrawdown = 0;
-    prices.forEach(price => {
-      peak = Math.max(peak, price);
-      maxDrawdown = Math.min(maxDrawdown, (price / peak - 1) * 100);
-    });
-    return {
-      start,
-      end,
-      change: (end / start - 1) * 100,
-      high: Math.max(...prices),
-      low: Math.min(...prices),
-      maxDrawdown
-    };
   }
 
   async function load() {
@@ -52,7 +32,7 @@ window.App = window.App || {};
 
     const items = ids.map((id, i) => {
       const series = histories[i];
-      return { meta: dataService.getAssetMeta(id), series, metrics: calcMetrics(series), color: SERIES_COLORS[i] };
+      return { meta: dataService.getAssetMeta(id), series, metrics: seriesMetrics(series), color: SERIES_COLORS[i] };
     });
 
     renderSummary(items);
