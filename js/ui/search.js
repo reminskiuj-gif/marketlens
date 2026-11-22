@@ -24,7 +24,7 @@ window.App = window.App || {};
       ? matches.map(asset => {
         const selected = compare.includes(asset.id);
         return `<div class="search-item">
-          <button class="search-item-main" data-goto-id="${asset.id}">
+          <button class="search-item-main" data-details-id="${asset.id}">
             ${ui.logo(asset)}${ui.assetName(asset)}
           </button>
           ${ui.typeTag(asset.type)}
@@ -50,7 +50,7 @@ window.App = window.App || {};
         input.blur();
       }
       if (event.key === 'Enter') {
-        const first = results.querySelector('[data-goto-id]');
+        const first = results.querySelector('[data-details-id]');
         if (first) first.click();
       }
     });
@@ -58,9 +58,9 @@ window.App = window.App || {};
     results.addEventListener('click', event => {
       const compareBtn = event.target.closest('[data-compare-id]');
       if (compareBtn) return App.actions.toggleCompare(compareBtn.dataset.compareId);
-      const gotoBtn = event.target.closest('[data-goto-id]');
-      if (gotoBtn) {
-        App.actions.goToAsset(gotoBtn.dataset.gotoId);
+      const detailsBtn = event.target.closest('[data-details-id]');
+      if (detailsBtn) {
+        App.actions.openDetails(detailsBtn.dataset.detailsId);
         input.value = '';
         hide();
       }
