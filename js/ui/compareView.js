@@ -69,16 +69,37 @@ window.App = window.App || {};
     });
   }
 
+  // Ряди з різних джерел мають різну кількість точок (крипта — погодинні чи
+  // 4-годинні свічки, акції — щоденні), тому зводимо їх до спільної сітки часу:
+  // для кожного моменту беремо останню відому ціну. Біржа акцій закривається
+  // на ніч і вихідні, а крипта торгується завжди, тож періоди можуть не збігатися
+  // (у неділю "день" акції — це п'ятнична сесія). Сітка охоплює обидва періоди
+  // повністю: поза своїм періодом лінія стоїть рівно, і кожна лінія закінчується
+  // тією ж зміною, що й у таблиці.
+  function alignSeries(seriesList, points = 80) {
+    const start = Math.min(...seriesList.map(s => s[0].time));
+    const end = Math.max(...seriesList.map(s => s[s.length - 1].time));
+    const times = Array.from({ length: points }, (_, i) => start + (end - start) * i / (points - 1));
+    const values = seriesList.map(series => {
+      let j = 0;
+      return times.map(time => {
+        while (j < series.length - 1 && series[j + 1].time <= time) j++;
+        return series[j].price;
+      });
+    });
+    return { times, values };
+  }
+
   function renderChart(items) {
-    const labels = items[0].series.map(point => point.time);
+    const { times: labels, values } = alignSeries(items.map(item => item.series));
     const textColor = cssVar('--muted');
     const gridColor = cssVar('--border');
 
-    const datasets = items.map(item => {
-      const base = item.series[0].price;
+    const datasets = items.map((item, i) => {
+      const base = values[i][0];
       return {
         label: item.meta.symbol,
-        data: item.series.map(point => (point.price / base - 1) * 100),
+        data: values[i].map(price => (price / base - 1) * 100),
         borderColor: item.color,
         backgroundColor: item.color,
         borderWidth: 2,

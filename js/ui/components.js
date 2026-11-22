@@ -17,6 +17,7 @@ window.App = window.App || {};
   }
 
   function change(value) {
+    if (value === null) return `<span class="change change-flat" title="${t('table.historyLoading')}">…</span>`;
     const direction = value > 0.005 ? 'up' : value < -0.005 ? 'down' : 'flat';
     const arrow = direction === 'up' ? '▲' : direction === 'down' ? '▼' : '';
     return `<span class="change change-${direction}"><span class="change-arrow">${arrow}</span>${formatPercent(value)}</span>`;
@@ -40,6 +41,7 @@ window.App = window.App || {};
 
   // Міні-графік у вигляді SVG-ламаної
   function sparkline(values, width = 110, height = 32) {
+    if (!values) return `<span class="spark-loading" style="width:${width}px" title="${t('table.historyLoading')}"></span>`;
     const min = Math.min(...values);
     const max = Math.max(...values);
     const range = max - min || 1;

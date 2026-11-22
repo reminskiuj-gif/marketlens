@@ -10,13 +10,12 @@ window.App = window.App || {};
   const DAY_MS = 24 * 60 * 60 * 1000;
   const HOUR_MS = 60 * 60 * 1000;
 
-  function startOfToday() {
-    const d = new Date();
-    d.setHours(0, 0, 0, 0);
-    return d.getTime();
+  // Остання точка — поточна година, щоб тестові ряди збігались у часі з живими
+  function currentHour() {
+    return Math.floor(Date.now() / HOUR_MS) * HOUR_MS;
   }
 
-  // Денні ціни закриття за останні `days` днів, остання = asset.price
+  // Денні ціни за останні `days` днів, остання = asset.price
   function generateDaily(asset, days) {
     const rand = createRandom(hashString(asset.id));
     const isStablecoin = asset.vol < 0.01;
@@ -34,7 +33,7 @@ window.App = window.App || {};
 
     // Зсуваємо ряд так, щоб остання точка дорівнювала поточній ціні
     const shift = Math.log(asset.price) - logs[days];
-    const end = startOfToday();
+    const end = currentHour();
     return logs.map((value, i) => ({
       time: end - (days - i) * DAY_MS,
       price: Math.exp(value + shift)
@@ -51,7 +50,7 @@ window.App = window.App || {};
     for (let i = 1; i <= hours; i++) walk.push(walk[i - 1] + sigma * gaussian(rand));
 
     const target = Math.log(toPrice / fromPrice);
-    const now = Math.floor(Date.now() / HOUR_MS) * HOUR_MS;
+    const now = currentHour();
     return walk.map((value, i) => ({
       time: now - (hours - i) * HOUR_MS,
       price: fromPrice * Math.exp(value - (i / hours) * (walk[hours] - target))

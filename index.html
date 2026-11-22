@@ -55,6 +55,7 @@
       <div>
         <h1 id="page-title">Ринок акцій</h1>
         <p id="page-subtitle" class="muted"></p>
+        <span id="source-badge" class="source-badge"></span>
       </div>
       <div class="hero-controls">
         <span class="muted small" data-i18n="period.label">Період:</span>
@@ -187,6 +188,11 @@
   <script src="js/i18n.js"></script>
   <script src="js/data/assets.js"></script>
   <script src="js/data/mockGenerator.js"></script>
+  <!-- Ключі API: файл не комітиться, приклад — js/config.example.js. Без нього акції будуть на тестових даних -->
+  <script src="js/config.local.js"></script>
+  <script src="js/services/binance.js"></script>
+  <script src="js/services/finnhub.js"></script>
+  <script src="js/services/twelveData.js"></script>
   <script src="js/services/dataService.js"></script>
   <script src="js/store.js"></script>
   <script src="js/ui/components.js"></script>

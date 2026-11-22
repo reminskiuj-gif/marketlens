@@ -255,6 +255,40 @@ button { cursor: pointer; }
 }
 .card-header h2 { display: flex; align-items: center; gap: 8px; }
 
+/* Позначка джерела даних під заголовком */
+.source-badge {
+  display: inline-flex; align-items: center; gap: 7px;
+  margin-top: 10px; padding: 3px 10px 3px 8px;
+  border-radius: 999px; font-size: 12.5px; font-weight: 600;
+  cursor: help;
+}
+.source-badge:empty { display: none; }
+.source-badge::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.source-badge.is-live { color: var(--up); background: var(--up-soft); }
+.source-badge.is-live::before { animation: live-pulse 1.6s ease-in-out infinite; }
+.source-badge.is-demo { color: var(--muted); background: var(--surface-2); }
+@keyframes live-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--up) 60%, transparent); }
+  50% { box-shadow: 0 0 0 5px transparent; }
+}
+
+/* Заглушка міні-графіка, поки вантажиться історія */
+.spark-loading {
+  display: block; height: 6px; border-radius: 3px;
+  background: linear-gradient(90deg, var(--surface-2) 25%, var(--border) 50%, var(--surface-2) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+@keyframes shimmer { to { background-position: -200% 0; } }
+.movers-empty { padding: 24px 10px; text-align: center; color: var(--muted); font-size: 14px; }
+
+/* Підсвічування ціни, коли вона змінилась */
+.cell-price { border-radius: 6px; }
+.cell-price.tick-up { animation: tick-up 1s ease; }
+.cell-price.tick-down { animation: tick-down 1s ease; }
+@keyframes tick-up { 0% { background: var(--up-soft); color: var(--up); } }
+@keyframes tick-down { 0% { background: var(--down-soft); color: var(--down); } }
+
 .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
 .dot-up { background: var(--up); }
 .dot-down { background: var(--down); }
