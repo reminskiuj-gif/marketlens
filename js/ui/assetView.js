@@ -23,7 +23,6 @@ window.App = window.App || {};
 
   function init() {
     els.page = document.getElementById('asset-page');
-    els.market = document.getElementById('market');
     els.back = document.getElementById('asset-back');
     els.title = document.getElementById('asset-title');
     els.price = document.getElementById('asset-price');
@@ -44,6 +43,10 @@ window.App = window.App || {};
       App.actions.goToAsset(id);
     });
     els.compare.addEventListener('click', () => App.actions.toggleCompare(assetId));
+    // Ціна покупки за замовчуванням — поточна ціна з графіка
+    document.getElementById('asset-portfolio').addEventListener('click', () => {
+      App.portfolioView.openPurchaseForm(assetId, series && series[series.length - 1].price);
+    });
     els.similar.addEventListener('click', event => {
       const link = event.target.closest('[data-details-id]');
       if (link) App.actions.openDetails(link.dataset.detailsId);
@@ -67,7 +70,6 @@ window.App = window.App || {};
   function open(id) {
     const isNewAsset = id !== assetId;
     assetId = id;
-    els.market.hidden = true;
     els.page.hidden = false;
     if (!isNewAsset) return;
     period = store.get().period;
@@ -86,7 +88,6 @@ window.App = window.App || {};
       chart = null;
     }
     els.page.hidden = true;
-    els.market.hidden = false;
     document.title = t('meta.title');
   }
 
