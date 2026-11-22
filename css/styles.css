@@ -671,6 +671,9 @@ td.col-rank { color: var(--muted); font-size: 13px; }
 }
 .field select:focus, .field input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
 .field select:disabled { opacity: .6; }
+/* min-width: 0 — інакше поле вводу не стискається і вилазить за межі вікна */
+.field { min-width: 0; }
+.field select, .field input { width: 100%; min-width: 0; }
 .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .form-note { margin: -6px 0 0; min-height: 1.2em; }
 .form-error { margin: -6px 0 0; color: var(--down); font-weight: 600; }
@@ -793,7 +796,10 @@ td.col-rank { color: var(--muted); font-size: 13px; }
 .portfolio-summary { grid-template-columns: repeat(4, 1fr); }
 .portfolio-summary .stat-value { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
 
-.portfolio-grid { display: grid; grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr); gap: 16px; align-items: start; }
+/* Таблиця на всю ширину, під нею — діаграма розподілу з легендою поруч */
+.portfolio-grid { display: grid; gap: 16px; }
+.allocation-card { display: grid; grid-template-columns: 1fr 1fr; align-items: center; }
+.allocation-card .card-header { grid-column: 1 / -1; }
 .portfolio-table .profit-cell { display: inline-flex; align-items: center; gap: 8px; }
 .col-remove { width: 44px; }
 .remove-btn {
@@ -809,13 +815,6 @@ td.col-rank { color: var(--muted); font-size: 13px; }
 .allocation-legend strong { margin-left: auto; }
 .legend-dot { width: 10px; height: 10px; border-radius: 3px; background: var(--dot); }
 
-/* На середніх екранах таблиці бракує місця поруч із діаграмою — ставимо їх одне під одним */
-@media (max-width: 1180px) {
-  .portfolio-grid { grid-template-columns: 1fr; }
-  .allocation-card { display: grid; grid-template-columns: 1fr 1fr; align-items: center; }
-  .allocation-card .card-header { grid-column: 1 / -1; }
-}
-
 /* Мінімальна адаптація під вузькі екрани (повна мобільна версія — пізніше) */
 @media (max-width: 960px) {
   .topbar-inner { grid-template-columns: auto 1fr; height: auto; padding-top: 10px; padding-bottom: 10px; }
@@ -825,5 +824,5 @@ td.col-rank { color: var(--muted); font-size: 13px; }
   .hero { flex-direction: column; align-items: flex-start; }
   .asset-chart-box { height: 300px; }
   .asset-stats, .portfolio-summary { grid-template-columns: repeat(2, 1fr); }
-  .portfolio-grid { grid-template-columns: 1fr; }
+  .allocation-card { grid-template-columns: 1fr; }
 }
