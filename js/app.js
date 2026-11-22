@@ -105,15 +105,21 @@ window.App = window.App || {};
     return match && dataService.getAssetMeta(decodeURIComponent(match[1]));
   }
 
+  // Що показати за поточною адресою: сторінку активу, портфель чи головний екран
   function route() {
     const asset = assetFromHash();
-    if (!asset) {
-      App.assetView.close();
-      return;
+    const isPortfolio = location.hash === '#/portfolio';
+    document.getElementById('market').hidden = Boolean(asset || isPortfolio);
+
+    if (!isPortfolio) App.portfolioView.close();
+    if (!asset) App.assetView.close();
+
+    if (isPortfolio) App.portfolioView.open();
+    if (asset) {
+      // Відкриваємо розділ активу, щоб живі ціни йшли саме для нього
+      if (store.get().tab !== asset.type) store.set({ tab: asset.type });
+      App.assetView.open(asset.id);
     }
-    // Відкриваємо розділ активу, щоб живі ціни йшли саме для нього
-    if (store.get().tab !== asset.type) store.set({ tab: asset.type });
-    App.assetView.open(asset.id);
   }
 
   // Догрузилась частина історії цін акцій — перебудовуємо список без перепідключення живих цін
@@ -168,6 +174,7 @@ window.App = window.App || {};
     App.compareTray.init();
     App.compareView.init();
     App.assetView.init();
+    App.portfolioView.init();
 
     store.subscribe((state, changed) => {
       if (changed.includes('tab') || changed.includes('period')) loadMarket();

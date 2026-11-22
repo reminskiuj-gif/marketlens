@@ -184,7 +184,7 @@ body {
 }
 
 body.modal-open { overflow: hidden; }
-body.has-tray .market { padding-bottom: 120px; }
+body.has-tray main { padding-bottom: 120px; }
 
 h1, h2, h3 { margin: 0; line-height: 1.25; }
 h1 {
@@ -664,11 +664,16 @@ td.col-rank { color: var(--muted); font-size: 13px; }
 .theme-option input:checked + span { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); font-weight: 600; }
 .theme-option input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
 .field { display: grid; }
-.field select {
+.field select, .field input {
   height: 40px; padding: 0 10px; border-radius: 10px;
   border: 1px solid var(--border); background: var(--surface);
+  outline: none; transition: border-color .15s, box-shadow .15s;
 }
+.field select:focus, .field input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
 .field select:disabled { opacity: .6; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-note { margin: -6px 0 0; min-height: 1.2em; }
+.form-error { margin: -6px 0 0; color: var(--down); font-weight: 600; }
 .field small { margin-top: 4px; }
 
 /* ---------- Сповіщення і підвал ---------- */
@@ -745,6 +750,72 @@ td.col-rank { color: var(--muted); font-size: 13px; }
 }
 .similar-item:hover { border-color: var(--accent); transform: translateY(-1px); }
 
+/* ---------- Профіль і портфель ---------- */
+
+.portfolio-page { padding-top: 36px; padding-bottom: 40px; }
+.portfolio-page[hidden] { display: none; }
+
+.avatar {
+  display: grid; place-items: center; flex: none;
+  border-radius: 50%;
+  background: var(--accent-gradient); color: var(--accent-contrast);
+  font-weight: 800; letter-spacing: -0.02em;
+}
+.avatar-sm { width: 26px; height: 26px; font-size: 11px; }
+.avatar-lg { width: 64px; height: 64px; font-size: 22px; box-shadow: var(--glow); }
+.profile-btn.has-profile { border-color: transparent; background: none; }
+
+.btn-danger:hover { color: var(--down); border-color: var(--down); }
+.text-up { color: var(--up); }
+.text-down { color: var(--down); }
+
+/* Створення профілю */
+.profile-card, .empty-state {
+  max-width: 520px; margin: 24px auto;
+  padding: 32px; text-align: center;
+  display: grid; justify-items: center; gap: 12px;
+}
+.profile-card p, .empty-state p { margin: 0; }
+.profile-form { width: 100%; display: grid; gap: 14px; margin-top: 8px; text-align: left; }
+.profile-form .field > span { display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; }
+.profile-form-actions { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+.empty-state { max-width: none; margin: 0; padding: 48px 24px; }
+.empty-icon { font-size: 40px; }
+
+.portfolio-head {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+  gap: 16px; margin-bottom: 20px;
+}
+.portfolio-user { display: flex; align-items: center; gap: 16px; }
+.portfolio-user p { margin: 4px 0 0; }
+.portfolio-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+.portfolio-summary { grid-template-columns: repeat(4, 1fr); }
+.portfolio-summary .stat-value { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+
+.portfolio-grid { display: grid; grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr); gap: 16px; align-items: start; }
+.portfolio-table .profit-cell { display: inline-flex; align-items: center; gap: 8px; }
+.col-remove { width: 44px; }
+.remove-btn {
+  width: 28px; height: 28px; border: 0; border-radius: 8px;
+  background: none; color: var(--muted);
+}
+.remove-btn:hover { background: var(--down-soft); color: var(--down); }
+
+.allocation-chart { position: relative; height: 220px; padding: 0 18px; display: grid; place-items: center; }
+.skeleton-donut { width: 180px; height: 180px; border-radius: 50%; }
+.allocation-legend { list-style: none; margin: 0; padding: 14px 18px 18px; display: grid; gap: 8px; }
+.allocation-legend li { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+.allocation-legend strong { margin-left: auto; }
+.legend-dot { width: 10px; height: 10px; border-radius: 3px; background: var(--dot); }
+
+/* На середніх екранах таблиці бракує місця поруч із діаграмою — ставимо їх одне під одним */
+@media (max-width: 1180px) {
+  .portfolio-grid { grid-template-columns: 1fr; }
+  .allocation-card { display: grid; grid-template-columns: 1fr 1fr; align-items: center; }
+  .allocation-card .card-header { grid-column: 1 / -1; }
+}
+
 /* Мінімальна адаптація під вузькі екрани (повна мобільна версія — пізніше) */
 @media (max-width: 960px) {
   .topbar-inner { grid-template-columns: auto 1fr; height: auto; padding-top: 10px; padding-bottom: 10px; }
@@ -753,5 +824,6 @@ td.col-rank { color: var(--muted); font-size: 13px; }
   .movers { grid-template-columns: 1fr; }
   .hero { flex-direction: column; align-items: flex-start; }
   .asset-chart-box { height: 300px; }
-  .asset-stats { grid-template-columns: repeat(2, 1fr); }
+  .asset-stats, .portfolio-summary { grid-template-columns: repeat(2, 1fr); }
+  .portfolio-grid { grid-template-columns: 1fr; }
 }

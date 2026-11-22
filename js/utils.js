@@ -82,6 +82,15 @@ window.App = window.App || {};
     return formatters().compact.format(value);
   }
 
+  // Точне число без скорочень (кількість монет може бути дробовою: 0,05 BTC)
+  function formatNumber(value) {
+    return value.toLocaleString(locale(), { maximumFractionDigits: 8 });
+  }
+
+  function formatDate(time) {
+    return formatters().fullDate.format(time);
+  }
+
   // Основні показники ряду цін [{ time, price }] за період.
   // Використовуються у вікні порівняння і на сторінці активу
   function seriesMetrics(series) {
@@ -159,6 +168,8 @@ window.App = window.App || {};
     formatPercent,
     formatCompact,
     formatAmount,
+    formatNumber,
+    formatDate,
     seriesMetrics,
     formatAxisDate,
     formatFullDate,
